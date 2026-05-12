@@ -1,0 +1,25 @@
+[
+  {
+    "id": "63bf89c1-8254-4bd1-b14d-0aa86a94a46a",
+    "eventId": "6a2deb50-1822-4ef4-8f94-0d86648c06ef",
+    "name": "Test",
+    "rating": 5,
+    "comments": "test",
+    "answers": {},
+    "submittedAt": "2026-04-29T03:37:41.6215499Z",
+    "displayName": "Test"
+  },
+  {
+    "id": "529fb420-262b-4a9d-bcb1-cef19ce03e61",
+    "eventId": "a0435e8b-79f4-4311-8ab2-ee39df0786f3",
+    "name": "Maitri",
+    "rating": 5,
+    "comments": "Test",
+    "answers": {
+      "Feedback": null,
+      "__RequestVerificationToken": "CfDJ8C4mzBg0ypJLjpVWqNE9tn5OnyQFPTA__v4D3nSlXXJw7imTFslHn-u_MvQfD4WnUXfi0nS1GjFNMEizaR6Ccnhhh6QJsC-8N4yUnAzoJvKQtFL6vxGhCAmgn5GCV1gxj-yYmsPVJLaaZUxgWixHNks"
+    },
+    "submittedAt": "2026-04-29T07:08:08.8283915Z",
+    "displayName": "Maitri"
+  }
+]

@@ -1,0 +1,257 @@
+@page "{id:guid}"
+@model FeedbackApp.Pages.Admin.Events.EditModel
+@{
+    ViewData["Title"] = "Edit Event";
+}
+
+<div class="max-w-3xl mx-auto fade-in">
+    <!-- Back Button -->
+    <a asp-page="/Admin/Index" class="inline-flex items-center text-gray-600 hover:text-purple-600 mb-6 transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Dashboard
+    </a>
+
+    @if (Model.Event == null)
+    {
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8 text-center">
+            <div class="text-6xl mb-4">❌</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Event Not Found</h2>
+        </div>
+    }
+    else
+    {
+        <form method="post" id="eventForm">
+            <input type="hidden" asp-for="Event.Id" />
+            <input type="hidden" asp-for="Event.CreatedAt" />
+
+            <!-- Basic Info Card -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8 mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center mb-6">
+                    <span class="mr-2">✏️</span> Edit Event
+                </h1>
+
+                <!-- Event Name -->
+                <div class="mb-6">
+                    <label asp-for="Event.Name" class="block text-gray-700 font-medium mb-2">
+                        Event Name <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="Event.Name"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all" />
+                    <span asp-validation-for="Event.Name" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-6">
+                    <label asp-for="Event.Description" class="block text-gray-700 font-medium mb-2">
+                        Description <span class="text-gray-400 text-sm">(optional)</span>
+                    </label>
+                    <textarea asp-for="Event.Description"
+                              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all resize-none"
+                              rows="3"></textarea>
+                </div>
+
+                <!-- Event Date -->
+                <div class="mb-6">
+                    <label asp-for="Event.EventDate" class="block text-gray-700 font-medium mb-2">
+                        Event Date <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="Event.EventDate" type="date"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all" />
+                    <span asp-validation-for="Event.EventDate" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Include Rating Toggle -->
+                <div class="mb-6">
+                    <label class="flex items-center cursor-pointer">
+                        <input asp-for="Event.IncludeRating" type="checkbox"
+                               class="w-5 h-5 text-purple-500 rounded focus:ring-purple-400 mr-3" />
+                        <span class="text-gray-700 font-medium">Include Star Rating</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Questions Builder Card -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <span class="mr-2">📋</span> Survey Questions
+                    </h2>
+                    <span class="text-gray-400 text-sm">Add or modify questions</span>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questions-container" class="space-y-4">
+                    @for (int i = 0; i < Model.Event.Questions.Count; i++)
+                    {
+                        var q = Model.Event.Questions[i];
+                        var showOptions = q.Type == FeedbackApp.Models.QuestionType.SingleChoice ||
+                                         q.Type == FeedbackApp.Models.QuestionType.MultipleChoice;
+
+                        <div class="question-item bg-gray-50 rounded-xl p-4 relative" data-index="@i">
+                            <input type="hidden" name="Questions[@i].Id" value="@q.Id" />
+
+                            <button type="button" onclick="removeQuestion(this)"
+                                    class="absolute top-2 right-2 w-8 h-8 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors flex items-center justify-center">
+                                ×
+                            </button>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-gray-600 text-sm mb-1">Question Text <span class="text-red-500">*</span></label>
+                                    <input type="text" name="Questions[@i].Text" value="@q.Text"
+                                           class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none"
+                                           required />
+                                </div>
+
+                                <div>
+                                    <label class="block text-gray-600 text-sm mb-1">Type</label>
+                                    <select name="Questions[@i].Type" onchange="toggleOptions(this)"
+                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none">
+                                        <option value="Text" selected="@(q.Type == FeedbackApp.Models.QuestionType.Text)">Short Text</option>
+                                        <option value="TextArea" selected="@(q.Type == FeedbackApp.Models.QuestionType.TextArea)">Long Text</option>
+                                        <option value="SingleChoice" selected="@(q.Type == FeedbackApp.Models.QuestionType.SingleChoice)">Single Choice</option>
+                                        <option value="MultipleChoice" selected="@(q.Type == FeedbackApp.Models.QuestionType.MultipleChoice)">Multiple Choice</option>
+                                        <option value="YesNo" selected="@(q.Type == FeedbackApp.Models.QuestionType.YesNo)">Yes/No</option>
+                                    </select>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" name="Questions[@i].IsRequired" value="true"
+                                               @(q.IsRequired ? "checked" : "")
+                                               class="w-4 h-4 text-purple-500 rounded focus:ring-purple-400 mr-2" />
+                                        <span class="text-gray-600 text-sm">Required</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="options-container @(showOptions ? "" : "hidden")">
+                                <label class="block text-gray-600 text-sm mb-1">Options <span class="text-gray-400">(comma separated)</span></label>
+                                <input type="text" name="Questions[@i].Options" value="@q.Options"
+                                       class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none" />
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Add Question Button -->
+                <button type="button" onclick="addQuestion()"
+                        class="w-full mt-4 py-3 border-2 border-dashed border-purple-300 rounded-xl text-purple-600 hover:bg-purple-50 transition-colors font-medium">
+                    ➕ Add Question
+                </button>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-4">
+                <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-pink-400 to-purple-500 text-white py-4 rounded-xl font-bold text-lg btn-cute hover:shadow-lg">
+                    💾 Save Changes
+                </button>
+                <a asp-page="/Admin/Index"
+                   class="px-8 py-4 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    }
+</div>
+
+<!-- Question Template -->
+<template id="question-template">
+    <div class="question-item bg-gray-50 rounded-xl p-4 relative" data-index="INDEX">
+        <button type="button" onclick="removeQuestion(this)"
+                class="absolute top-2 right-2 w-8 h-8 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors flex items-center justify-center">
+            ×
+        </button>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="md:col-span-2">
+                <label class="block text-gray-600 text-sm mb-1">Question Text <span class="text-red-500">*</span></label>
+                <input type="text" name="Questions[INDEX].Text"
+                       class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none"
+                       placeholder="Enter your question..." required />
+            </div>
+
+            <div>
+                <label class="block text-gray-600 text-sm mb-1">Type</label>
+                <select name="Questions[INDEX].Type" onchange="toggleOptions(this)"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none">
+                    <option value="Text">Short Text</option>
+                    <option value="TextArea">Long Text</option>
+                    <option value="SingleChoice">Single Choice</option>
+                    <option value="MultipleChoice">Multiple Choice</option>
+                    <option value="YesNo">Yes/No</option>
+                </select>
+            </div>
+
+            <div class="flex items-center">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="Questions[INDEX].IsRequired" value="true" checked
+                           class="w-4 h-4 text-purple-500 rounded focus:ring-purple-400 mr-2" />
+                    <span class="text-gray-600 text-sm">Required</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="options-container hidden">
+            <label class="block text-gray-600 text-sm mb-1">Options <span class="text-gray-400">(comma separated)</span></label>
+            <input type="text" name="Questions[INDEX].Options"
+                   class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-400 outline-none"
+                   placeholder="Option 1, Option 2, Option 3..." />
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let questionIndex = @(Model.Event?.Questions.Count ?? 0);
+
+        function addQuestion() {
+            const container = document.getElementById('questions-container');
+            const template = document.getElementById('question-template');
+
+            // Clone the template content
+            const clone = template.content.cloneNode(true);
+            const questionItem = clone.querySelector('.question-item');
+
+            // Get the HTML and replace INDEX placeholders
+            let html = questionItem.outerHTML.replace(/INDEX/g, questionIndex);
+
+            // Add to container
+            container.insertAdjacentHTML('beforeend', html);
+            questionIndex++;
+        }
+
+        function removeQuestion(button) {
+            const questionItem = button.closest('.question-item');
+            questionItem.remove();
+            reindexQuestions();
+        }
+
+        function reindexQuestions() {
+            const questions = document.querySelectorAll('.question-item');
+            questions.forEach((q, i) => {
+                q.dataset.index = i;
+                q.querySelectorAll('[name]').forEach(input => {
+                    input.name = input.name.replace(/\[\d+\]/, `[${i}]`);
+                });
+            });
+            questionIndex = questions.length;
+        }
+
+        function toggleOptions(select) {
+            const questionItem = select.closest('.question-item');
+            const optionsContainer = questionItem.querySelector('.options-container');
+            const needsOptions = ['SingleChoice', 'MultipleChoice'].includes(select.value);
+
+            if (needsOptions) {
+                optionsContainer.classList.remove('hidden');
+            } else {
+                optionsContainer.classList.add('hidden');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,28 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Oops!";
+}
+
+<div class="max-w-xl mx-auto text-center fade-in py-12">
+    <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-12">
+        <div class="text-8xl mb-6">😅</div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Oops! Something went wrong</h1>
+        <p class="text-gray-600 mb-8">
+            Don't worry, it's not your fault! Our team has been notified.
+        </p>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm">
+                <span class="text-gray-500">Request ID:</span>
+                <code class="text-purple-600 ml-2">@Model.RequestId</code>
+            </div>
+        }
+
+        <a asp-page="/Index"
+           class="inline-flex items-center bg-gradient-to-r from-pink-400 to-purple-500 text-white px-8 py-3 rounded-xl font-medium btn-cute hover:shadow-lg">
+            🏠 Back to Home
+        </a>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "6a2deb50-1822-4ef4-8f94-0d86648c06ef",
+    "name": "Maitri Farewell",
+    "description": null,
+    "eventDate": "2026-05-04T00:00:00",
+    "createdAt": "2026-04-29T03:37:02.6692626Z",
+    "includeRating": true,
+    "questions": [],
+    "status": "Upcoming",
+    "canSubmitFeedback": true,
+    "shareToken": "6a2deb501822"
+  },
+  {
+    "id": "a0435e8b-79f4-4311-8ab2-ee39df0786f3",
+    "name": "Career Fair",
+    "description": "Test",
+    "eventDate": "2026-05-06T00:00:00",
+    "createdAt": "2026-04-29T07:07:03.6356455Z",
+    "includeRating": false,
+    "questions": [
+      {
+        "id": "ebca9f76-dc17-4a81-b07e-163e6f3c7b04",
+        "text": "test",
+        "type": "Text",
+        "isRequired": true,
+        "options": null,
+        "order": 0
+      }
+    ],
+    "status": "Upcoming",
+    "canSubmitFeedback": true,
+    "shareToken": "a0435e8b79f4"
+  }
+]

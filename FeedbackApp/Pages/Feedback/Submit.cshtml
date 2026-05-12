@@ -1,0 +1,329 @@
+@page "{token}"
+@model FeedbackApp.Pages.Feedback.SubmitModel
+@{
+    ViewData["Title"] = Model.Event?.Name ?? "Submit Feedback";
+    var showCelebration = TempData["Success"] != null;
+}
+
+<div class="max-w-2xl mx-auto fade-in">
+    @if (Model.Event == null)
+    {
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8 text-center">
+            <div class="text-6xl mb-4">❌</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Invalid Link</h2>
+            <p class="text-gray-600">This feedback link is invalid or the event doesn't exist.</p>
+            <a asp-page="/Index" class="inline-block mt-6 text-purple-600 hover:text-purple-700 font-medium">
+                ← Back to Home
+            </a>
+        </div>
+    }
+    else if (!Model.Event.CanSubmitFeedback)
+    {
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8 text-center">
+            <div class="text-6xl mb-4">🔒</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Feedback Closed</h2>
+            <p class="text-gray-600">This event has ended and feedback submission is no longer available.</p>
+            <p class="text-gray-500 text-sm mt-4">Event Date: @Model.Event.EventDate.ToString("MMMM dd, yyyy")</p>
+        </div>
+    }
+    else
+    {
+        <!-- Event Info Card -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-6 mb-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 mb-2">
+                        🟢 Accepting Feedback
+                    </span>
+                    <h1 class="text-2xl font-bold text-gray-800">@Model.Event.Name</h1>
+                    @if (!string.IsNullOrEmpty(Model.Event.Description))
+                    {
+                        <p class="text-gray-600 mt-2">@Model.Event.Description</p>
+                    }
+                </div>
+                <div class="text-right text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <span class="mr-1">📅</span>
+                        @Model.Event.EventDate.ToString("MMM dd, yyyy")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message with Celebration -->
+        @if (showCelebration)
+        {
+            <div class="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-400 text-green-800 p-6 rounded-2xl mb-6 text-center relative overflow-hidden" id="success-card">
+                <!-- Animated sparkles -->
+                <div class="absolute inset-0 pointer-events-none">
+                    <div class="absolute top-2 left-4 text-2xl animate-pulse">✨</div>
+                    <div class="absolute top-4 right-6 text-xl animate-pulse delay-100">⭐</div>
+                    <div class="absolute bottom-2 left-8 text-xl animate-pulse delay-200">🌟</div>
+                    <div class="absolute bottom-4 right-4 text-2xl animate-pulse delay-300">✨</div>
+                </div>
+
+                <div class="relative z-10">
+                    <div class="text-5xl mb-3 animate-bounce">🎉</div>
+                    <h3 class="text-2xl font-bold mb-2">Thank You!</h3>
+                    <p class="text-green-700">@TempData["Success"]</p>
+                    <p class="text-sm text-green-600 mt-3">Your feedback helps us improve!</p>
+                </div>
+            </div>
+        }
+
+        <!-- Feedback Form -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <span class="mr-2">💭</span> Share Your Thoughts
+            </h2>
+
+            <form method="post" id="feedbackForm">
+                <input type="hidden" asp-for="Feedback.EventId" value="@Model.Event.Id" />
+
+                <!-- Name Field -->
+                <div class="mb-6">
+                    <label asp-for="Feedback.Name" class="block text-gray-700 font-medium mb-2">
+                        Your Name <span class="text-gray-400 text-sm">(optional)</span>
+                    </label>
+                    <input asp-for="Feedback.Name"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                           placeholder="Anonymous if left blank" />
+                </div>
+
+                <!-- Star Rating with Animated Emojis (if enabled) -->
+                @if (Model.Event.IncludeRating)
+                {
+                    <div class="mb-6">
+                        <label class="block text-gray-700 font-medium mb-2">
+                            Overall Rating <span class="text-red-500">*</span>
+                        </label>
+
+                        <!-- Animated Emoji Display -->
+                        <div class="text-center mb-4">
+                            <div id="rating-emoji" class="text-6xl transition-all duration-300 transform">
+                                🤔
+                            </div>
+                            <p class="text-gray-500 text-sm mt-2" id="rating-text">Click a star to rate</p>
+                        </div>
+
+                        <!-- Star Rating -->
+                        <div class="flex items-center justify-center space-x-2" id="star-rating">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <button type="button" onclick="setRating(@i, event)"
+                                        class="text-5xl star-btn text-gray-300 hover:text-yellow-400 transition-all duration-200 focus:outline-none transform hover:scale-110"
+                                        data-rating="@i">
+                                    ★
+                                </button>
+                            }
+                            <input type="hidden" asp-for="Feedback.Rating" id="rating-input" />
+                        </div>
+                        <span asp-validation-for="Feedback.Rating" class="text-red-500 text-sm block text-center mt-2"></span>
+                    </div>
+                }
+
+                <!-- Custom Questions -->
+                @if (Model.Event.Questions.Any())
+                {
+                    <div class="border-t border-gray-100 pt-6 mt-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <span class="mr-2">📋</span> Survey Questions
+                        </h3>
+
+                        @foreach (var question in Model.Event.Questions.OrderBy(q => q.Order))
+                        {
+                            var fieldName = $"Answers[{question.Id}]";
+                            var isRequired = question.IsRequired;
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-medium mb-2">
+                                    @question.Text
+                                    @if (isRequired)
+                                    {
+                                        <span class="text-red-500">*</span>
+                                    }
+                                </label>
+
+                                @switch (question.Type)
+                                {
+                                    case FeedbackApp.Models.QuestionType.Text:
+                                        <input type="text" name="@fieldName"
+                                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                                               placeholder="Your answer..."
+                                               @(isRequired ? "required" : "") />
+                                        break;
+
+                                    case FeedbackApp.Models.QuestionType.TextArea:
+                                        <textarea name="@fieldName"
+                                                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all resize-none"
+                                                  rows="3"
+                                                  placeholder="Your detailed answer..."
+                                                  @(isRequired ? "required" : "")></textarea>
+                                        break;
+
+                                    case FeedbackApp.Models.QuestionType.SingleChoice:
+                                        <div class="space-y-2">
+                                            @foreach (var option in question.GetOptionsList())
+                                            {
+                                                <label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors">
+                                                    <input type="radio" name="@fieldName" value="@option"
+                                                           class="w-4 h-4 text-purple-500 focus:ring-purple-400"
+                                                           @(isRequired ? "required" : "") />
+                                                    <span class="ml-3 text-gray-700">@option</span>
+                                                </label>
+                                            }
+                                        </div>
+                                        break;
+
+                                    case FeedbackApp.Models.QuestionType.MultipleChoice:
+                                        <div class="space-y-2">
+                                            @foreach (var option in question.GetOptionsList())
+                                            {
+                                                <label class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors">
+                                                    <input type="checkbox" name="@fieldName" value="@option"
+                                                           class="w-4 h-4 text-purple-500 rounded focus:ring-purple-400" />
+                                                    <span class="ml-3 text-gray-700">@option</span>
+                                                </label>
+                                            }
+                                        </div>
+                                        break;
+
+                                    case FeedbackApp.Models.QuestionType.YesNo:
+                                        <div class="flex space-x-4">
+                                            <label class="flex-1 flex items-center justify-center p-4 bg-gray-50 rounded-xl hover:bg-green-50 cursor-pointer transition-colors border-2 border-transparent has-[:checked]:border-green-400 has-[:checked]:bg-green-50">
+                                                <input type="radio" name="@fieldName" value="Yes" class="hidden" @(isRequired ? "required" : "") />
+                                                <span class="text-2xl mr-2">👍</span>
+                                                <span class="font-medium text-gray-700">Yes</span>
+                                            </label>
+                                            <label class="flex-1 flex items-center justify-center p-4 bg-gray-50 rounded-xl hover:bg-red-50 cursor-pointer transition-colors border-2 border-transparent has-[:checked]:border-red-400 has-[:checked]:bg-red-50">
+                                                <input type="radio" name="@fieldName" value="No" class="hidden" />
+                                                <span class="text-2xl mr-2">👎</span>
+                                                <span class="font-medium text-gray-700">No</span>
+                                            </label>
+                                        </div>
+                                        break;
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Additional Comments -->
+                <div class="mb-6 border-t border-gray-100 pt-6">
+                    <label asp-for="Feedback.Comments" class="block text-gray-700 font-medium mb-2">
+                        Additional Comments <span class="text-gray-400 text-sm">(optional)</span>
+                    </label>
+                    <textarea asp-for="Feedback.Comments"
+                              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all resize-none"
+                              rows="3"
+                              placeholder="Any other thoughts you'd like to share..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn"
+                        class="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white py-4 rounded-xl font-bold text-lg btn-cute hover:shadow-lg relative overflow-hidden group">
+                    <span class="relative z-10 flex items-center justify-center">
+                        <span class="mr-2 group-hover:animate-bounce">✨</span>
+                        Submit Feedback
+                        <span class="ml-2 group-hover:animate-bounce">✨</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Rating configuration with emojis
+        const ratingConfig = {
+            1: { emoji: '😞', text: 'Poor', color: '#ef4444' },
+            2: { emoji: '😐', text: 'Fair', color: '#f97316' },
+            3: { emoji: '🙂', text: 'Good', color: '#eab308' },
+            4: { emoji: '😊', text: 'Very Good', color: '#22c55e' },
+            5: { emoji: '🤩', text: 'Excellent!', color: '#a855f7' }
+        };
+
+        function setRating(rating, event) {
+            const ratingInput = document.getElementById('rating-input');
+            const ratingEmoji = document.getElementById('rating-emoji');
+            const ratingText = document.getElementById('rating-text');
+
+            ratingInput.value = rating;
+
+            // Animate emoji
+            ratingEmoji.style.transform = 'scale(0)';
+            setTimeout(() => {
+                ratingEmoji.textContent = ratingConfig[rating].emoji;
+                ratingEmoji.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    ratingEmoji.style.transform = 'scale(1)';
+                }, 150);
+            }, 150);
+
+            // Update text
+            ratingText.textContent = ratingConfig[rating].text;
+            ratingText.style.color = ratingConfig[rating].color;
+            ratingText.style.fontWeight = 'bold';
+
+            // Update stars
+            document.querySelectorAll('.star-btn').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                    // Add pop animation
+                    star.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        star.style.transform = 'scale(1)';
+                    }, 200);
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            });
+
+            // Create floating emoji at click position
+            if (event && window.FeedbackApp) {
+                const rect = event.target.getBoundingClientRect();
+                window.FeedbackApp.createFloatingEmoji(
+                    ratingConfig[rating].emoji,
+                    rect.left + rect.width / 2,
+                    rect.top
+                );
+            }
+
+            // Small confetti burst for high ratings
+            if (rating >= 4 && window.FeedbackApp) {
+                window.FeedbackApp.createConfetti(30);
+            }
+        }
+
+        // Trigger celebration on success
+        @if (showCelebration)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Trigger the full celebration
+                if (window.FeedbackApp) {
+                    window.FeedbackApp.celebrate("Thank You! 🎉");
+                }
+
+                // Scroll to success message
+                const successCard = document.getElementById('success-card');
+                if (successCard) {
+                    successCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+            </text>
+        }
+
+        // Set initial rating if exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingInput = document.getElementById('rating-input');
+            if (ratingInput && ratingInput.value && ratingInput.value > 0) {
+                setRating(parseInt(ratingInput.value), null);
+            }
+        });
+    </script>
+}

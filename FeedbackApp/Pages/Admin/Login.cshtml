@@ -1,0 +1,53 @@
+@page
+@model FeedbackApp.Pages.Admin.LoginModel
+@{
+    ViewData["Title"] = "Admin Login";
+}
+
+<div class="max-w-md mx-auto fade-in">
+    <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md p-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="text-6xl mb-4">🔐</div>
+            <h1 class="text-2xl font-bold text-gray-800">Admin Login</h1>
+            <p class="text-gray-500 mt-2">Enter your credentials to access the dashboard</p>
+        </div>
+
+        <!-- Error Message -->
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
+                <p>@Model.ErrorMessage</p>
+            </div>
+        }
+
+        <!-- Login Form -->
+        <form method="post">
+            <div class="mb-6">
+                <label asp-for="Username" class="block text-gray-700 font-medium mb-2">Username</label>
+                <input asp-for="Username"
+                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                       placeholder="Enter username" />
+            </div>
+
+            <div class="mb-6">
+                <label asp-for="Password" class="block text-gray-700 font-medium mb-2">Password</label>
+                <input asp-for="Password" type="password"
+                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                       placeholder="Enter password" />
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white py-4 rounded-xl font-bold text-lg btn-cute hover:shadow-lg">
+                🚀 Login
+            </button>
+        </form>
+
+        <!-- Demo Credentials -->
+        @* <div class="mt-6 p-4 bg-purple-50 rounded-xl">
+            <p class="text-sm text-purple-700 font-medium mb-1">Demo Credentials:</p>
+            <p class="text-sm text-purple-600">Username: <code class="bg-purple-100 px-2 py-1 rounded">admin</code></p>
+            <p class="text-sm text-purple-600">Password: <code class="bg-purple-100 px-2 py-1 rounded">admin123</code></p>
+        </div> *@
+    </div>
+</div>

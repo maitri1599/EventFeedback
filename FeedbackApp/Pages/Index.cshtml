@@ -1,0 +1,60 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="fade-in">
+    <!-- Hero Section -->
+    <div class="max-w-2xl mx-auto text-center py-16">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg p-12">
+            <div class="text-8xl mb-6">📝</div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                Welcome to <span class="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">FeedbackApp</span>
+            </h1>
+            <p class="text-gray-600 text-lg mb-8">
+                Share your valuable feedback on events and surveys.
+                If you have a feedback link, you're in the right place!
+            </p>
+
+            <!-- Info Box -->
+            <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6 mb-8">
+                <div class="flex items-center justify-center mb-3">
+                    <span class="text-2xl mr-2">🔗</span>
+                    <span class="font-semibold text-gray-700">Have a feedback link?</span>
+                </div>
+                <p class="text-gray-600 text-sm">
+                    Simply paste it in your browser or click the link you received to submit your feedback.
+                </p>
+            </div>
+
+            <!-- For Admins -->
+            <div class="border-t border-gray-200 pt-8">
+                <p class="text-gray-500 text-sm mb-4">Are you an event organizer?</p>
+                <a asp-page="/Admin/Login"
+                   class="inline-flex items-center bg-gradient-to-r from-pink-400 to-purple-500 text-white px-8 py-3 rounded-xl font-medium btn-cute hover:shadow-lg">
+                    🔐 Admin Login
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center card-hover">
+            <div class="text-4xl mb-4">⭐</div>
+            <h3 class="font-bold text-gray-800 mb-2">Rate Events</h3>
+            <p class="text-gray-600 text-sm">Share your experience with star ratings</p>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center card-hover">
+            <div class="text-4xl mb-4">💬</div>
+            <h3 class="font-bold text-gray-800 mb-2">Answer Questions</h3>
+            <p class="text-gray-600 text-sm">Provide detailed feedback through custom surveys</p>
+        </div>
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center card-hover">
+            <div class="text-4xl mb-4">🔒</div>
+            <h3 class="font-bold text-gray-800 mb-2">Stay Anonymous</h3>
+            <p class="text-gray-600 text-sm">Your feedback can be completely anonymous</p>
+        </div>
+    </div>
+</div>
